@@ -1,8 +1,11 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
 // Otetaan jsonparser käyttöön POSTia varten
 app.use(express.json())
+
+app.use(morgan('tiny'))
 
 const generateNewID = () => {
     // Muodostetaan persons-taulukon id-kentistä uusi taulukko
