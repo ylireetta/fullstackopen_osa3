@@ -5,7 +5,23 @@ const app = express()
 // Otetaan jsonparser käyttöön POSTia varten
 app.use(express.json())
 
-app.use(morgan('tiny'))
+morgan.token('body', function(req, res) {
+    return JSON.stringify(req.body)
+})
+
+// Ota mukaan lähetetty data jsonina, jos pyynnön metodi ei ole GET (eli todnäk se on POST?)
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body', { 
+    skip: function (req, res) { 
+        return req.method == 'GET' 
+    }
+}))
+
+// Käytä tiny-muotoilua, jos pyynnön metodi ei ole POST
+app.use(morgan('tiny', { 
+    skip: function(req, res) { 
+        return req.method == 'POST'
+    }
+}))
 
 const generateNewID = () => {
     // Muodostetaan persons-taulukon id-kentistä uusi taulukko
