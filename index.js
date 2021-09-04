@@ -1,7 +1,9 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 const app = express()
 
+app.use(cors())
 // Otetaan jsonparser käyttöön POSTia varten
 app.use(express.json())
 
@@ -12,7 +14,7 @@ morgan.token('body', function(req, res) {
 // Ota mukaan lähetetty data jsonina, jos pyynnön metodi ei ole GET (eli todnäk se on POST?)
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body', { 
     skip: function (req, res) { 
-        return req.method == 'GET' 
+        return req.method != 'POST' 
     }
 }))
 
