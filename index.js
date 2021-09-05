@@ -4,6 +4,10 @@ const cors = require('cors')
 const app = express()
 
 app.use(cors())
+
+// Tarkistetaan GET-pyyntöjen yhteydessä, löytyykö pyydettyä polkua vastaavaa tiedostoa build-hakemistosta
+app.use(express.static('build'))
+
 // Otetaan jsonparser käyttöön POSTia varten
 app.use(express.json())
 
