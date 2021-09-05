@@ -15,14 +15,14 @@ morgan.token('body', function(req, res) {
     return JSON.stringify(req.body)
 })
 
-// Ota mukaan lähetetty data jsonina, jos pyynnön metodi ei ole GET (eli todnäk se on POST?)
+// Ota mukaan lähetetty data jsonina, jos pyynnön metodi on POST (eli skippaa tämä jos ei ole POST)
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body', { 
     skip: function (req, res) { 
         return req.method != 'POST' 
     }
 }))
 
-// Käytä tiny-muotoilua, jos pyynnön metodi ei ole POST
+// Käytä tiny-muotoilua, jos pyynnön metodi ei ole POST (eli skippaa tämä jos pyyntö on POST)
 app.use(morgan('tiny', { 
     skip: function(req, res) { 
         return req.method == 'POST'
