@@ -32,7 +32,6 @@ app.use(morgan('tiny', {
 const generateNewID = () => {
     // Muodostetaan persons-taulukon id-kentistä uusi taulukko
     // ... on spread-syntaksi, jolla saadaan taulukosta yksittäiset luvut
-    // Haetaan suurin luku tai jos taulukko on tyhjä, otetaan perustaksi nolla
     
     const randomValue = () => {
         return Math.floor(Math.random() * 9999999)
@@ -40,8 +39,6 @@ const generateNewID = () => {
 
     let returnValue = 0
     const personIDs = [...persons].map(n => n.id)
-
-    console.log(personIDs)
 
     for (let i = 0; i < personIDs.length; i++) {
         returnValue = randomValue()
