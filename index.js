@@ -36,86 +36,27 @@ app.use(morgan('tiny', {
 
 
 // Resurssin lisääminen
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
-    if (!body.name || !body.number) {
-        return response.status(400).json({
-            error: 'data missing'
-        })
-    }
-
-    if (persons.some(person => person.name == body.name)) {
-        return response.status(400).json({
-            error: 'name must be unique'
-        })
-    }
-
     const person = new Contact({
-        //id: generateNewID(),
         name: body.name,
         number: body.number
     })
-    //persons = persons.concat(person)
-    //response.json(person)
-    person.save().then(savedPerson => {
-        response.json(savedPerson)
-    })
+
+    person.save()
+        .then(savedPerson => {
+            response.json(savedPerson.toJSON())
+        })
+        .catch(error => next(error))
 })
 
-
-const generateNewID = () => {
-    // Muodostetaan persons-taulukon id-kentistä uusi taulukko
-    // ... on spread-syntaksi, jolla saadaan taulukosta yksittäiset luvut
-    
-    const randomValue = () => {
-        return Math.floor(Math.random() * 9999999)
-    }
-
-    let returnValue = 0
-    const personIDs = [...persons].map(n => n.id)
-
-    for (let i = 0; i < personIDs.length; i++) {
-        returnValue = randomValue()
-
-        if (!personIDs.some(id => id === returnValue))
-            return returnValue
-    }
-        
-    return -1
-}
-
-let persons = [
-    {
-        id: 1,
-        name: "Arto Hellas",
-        number: "040-123456"
-    },
-    {
-        id: 2,
-        name: "Ada Lovelace",
-        number: "39-44-5323523"
-    },
-    {
-        id: 3,
-        name: "Dan Abramov",
-        number: "12-43-234345"
-    },
-    {
-        id: 4,
-        name: "Mary Poppendick",
-        number: "39-23-6423122"
-    }
-]
-
-// Jos mennään suoraan vain localhost 3001, saadaan vastaukseksi tämä
 app.get('/', (request, response) => {
     response.send('<h1>Hello World</h1>')
 })
 
 // Haetaan objektit MongoDB:sta
 app.get('/api/persons', (request, response) => {
-    //response.json(persons)
     Contact.find({}).then(contacts => {
         response.json(contacts)
     })
@@ -126,14 +67,6 @@ app.get('/api/persons', (request, response) => {
 // Huomioi, että vertailu tehdään == avulla eikä ===, sillä parametrina saadaan merkkijono eikä luku
 // Näin ollen ===-vertailu on false, sillä string != number
 app.get('/api/persons/:id', (request, response, next) => {
-    /* const id = request.params.id
-    const person = persons.find(person => person.id == id)
-
-    if (person)
-        response.json(person)
-    else
-        response.status(404).end() */
-
     Contact.findById(request.params.id).then(contact => {
         if (contact) {
             response.json(contact)
@@ -147,10 +80,6 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 // Resurssin poistaminen
 app.delete('/api/persons/:id', (request, response, next) => {
-    /* const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
-
-    response.status(204).end() */
     Contact.findByIdAndRemove(request.params.id)
         .then(result => {
             response.status(204).end()
@@ -193,6 +122,8 @@ const errorHandler = (error, request, response, next) => {
 
     if (error.name === 'CastError') {
         return response.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
     }
 
     next(error)

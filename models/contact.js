@@ -1,5 +1,6 @@
 // MongoDB-asiat
 const mongoose = require('mongoose')
+const uniqueValidator = require('mongoose-unique-validator')
 
 // Ympäristömuuttuja, jok haetaan .env-tiedostosta
 const url = process.env.MONGODB_URI
@@ -14,8 +15,8 @@ mongoose.connect(url)
     })
 
 const contactSchema = new mongoose.Schema({
-    name: String,
-    number: String
+    name: { type: String, unique: true, minlength: 3 },
+    number: { type: String, minlength: 8}
 })
 
 // Muotoillaan palautettavien objektien muotoa: otetaan MongoDB:n id-kenttä objektin id:ksi frontendiä varten ja poistetaan turhia kenttiä
@@ -26,5 +27,7 @@ contactSchema.set('toJSON', {
         delete returnedObject.__v
     }
 })
+
+contactSchema.plugin(uniqueValidator)
 
 module.exports = mongoose.model('Contact', contactSchema)
