@@ -21,16 +21,17 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model('Contact', contactSchema)
 
-if (givenName != null && givenNumber != null) {
+if (givenName !== null && givenNumber !== null) {
     const contact = new Contact({
         name: givenName,
         number: givenNumber
     })
 
-    contact.save().then(response => {
-        console.log(`added ${givenName} number ${givenNumber} to phonebook`)
-        mongoose.connection.close()
-    })
+    contact.save()
+        .then(savedContact => {
+            console.log(`added ${savedContact.name} number ${savedContact.number} to phonebook`)
+            mongoose.connection.close()
+        })
 }
 else {
     Contact.find({}).then(result => {

@@ -16,21 +16,21 @@ app.use(express.json())
 
 app.use(cors())
 
-morgan.token('body', function(request, response) {
+morgan.token('body', function(request) {
     return JSON.stringify(request.body)
 })
 
 // Ota mukaan lähetetty data jsonina, jos pyynnön metodi on POST (eli skippaa tämä jos ei ole POST)
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body', { 
-    skip: function (request, response) { 
-        return request.method != 'POST' 
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body', {
+    skip: function (request) {
+        return request.method !== 'POST'
     }
 }))
 
 // Käytä tiny-muotoilua, jos pyynnön metodi ei ole POST (eli skippaa tämä jos pyyntö on POST)
-app.use(morgan('tiny', { 
-    skip: function(request, response) { 
-        return request.method == 'POST'
+app.use(morgan('tiny', {
+    skip: function(request) {
+        return request.method === 'POST'
     }
 }))
 
@@ -67,23 +67,22 @@ app.get('/api/persons', (request, response) => {
 // Huomioi, että vertailu tehdään == avulla eikä ===, sillä parametrina saadaan merkkijono eikä luku
 // Näin ollen ===-vertailu on false, sillä string != number
 app.get('/api/persons/:id', (request, response, next) => {
-    Contact.findById(request.params.id).then(contact => {
-        if (contact) {
-            response.json(contact)
-        } else {
-            response.status(404).end()
-        }
-    })
-    .catch(error => next(error)) // Siirretään virhe middlewaren käsiteltäväksi
+    Contact.findById(request.params.id)
+        .then(contact => {
+            if (contact) {
+                response.json(contact)
+            } else {
+                response.status(404).end()
+            }
+        })
+        .catch(error => next(error)) // Siirretään virhe middlewaren käsiteltäväksi
 })
 
 
 // Resurssin poistaminen
 app.delete('/api/persons/:id', (request, response, next) => {
     Contact.findByIdAndRemove(request.params.id)
-        .then(result => {
-            response.status(204).end()
-        })
+        .then(response.status(204).end())
         .catch(error => next(error))
 })
 
